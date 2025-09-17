@@ -1,0 +1,138 @@
+:root{
+  --bg:#0f172a;
+  --paper:#ffffff;
+  --ink:#0f172a;
+  --muted:#6b7280;
+  --brand:#4f46e5;
+  --brand-2:#7c3aed;
+  --radius:16px;
+  --ring:0 0 0 2px rgba(79,70,229,.25), 0 10px 30px rgba(2,6,23,.25);
+  --danger:#ef4444;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(124,58,237,.25), transparent 60%),
+    radial-gradient(1200px 600px at 10% 110%, rgba(79,70,229,.25), transparent 60%),
+    var(--bg);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  color:#e5e7eb;
+}
+
+.shell{max-width:1200px; margin:36px auto; padding:0 16px}
+
+.toolbar{
+  display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:16px;
+}
+.toolbar-left, .toolbar-right{display:flex; gap:12px; align-items:center}
+.btn{
+  padding:10px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+  color:#fff; cursor:pointer; font-weight:600; letter-spacing:.2px; backdrop-filter: blur(6px);
+  transition: transform .05s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.btn:hover{box-shadow: var(--ring)}
+.btn:active{transform:translateY(1px)}
+.btn.brand{background: linear-gradient(135deg, var(--brand), var(--brand-2)); border-color: transparent}
+.hint{color:#cbd5e1; font-size:13px}
+
+.workspace{display:grid; grid-template-columns: 360px 1fr; gap:16px}
+@media (max-width: 960px){.workspace{grid-template-columns: 1fr}}
+
+.panel{
+  background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); border-radius:20px; padding:16px; backdrop-filter: blur(8px);
+}
+.panel h3{margin:0 0 10px 0; font-size:16px; font-weight:700; color:#fff; letter-spacing:.2px}
+.grid{display:grid; grid-template-columns: 1fr 1fr; gap:10px}
+.field{display:flex; flex-direction:column; gap:6px}
+.field label{font-size:12px; color:#cbd5e1}
+.input, .select, .textarea{
+  width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.1); background: rgba(15,23,42,.5); color:#fff; outline:none;
+}
+.textarea{min-height:110px; resize:vertical}
+.input.error{border-color: var(--danger); box-shadow: 0 0 0 3px rgba(239,68,68,.25)}
+
+.logo-uploader{
+  display:flex; gap:10px; align-items:center; padding:10px; border:1px dashed rgba(255,255,255,.2); border-radius:12px;
+}
+.logo-uploader img{width:56px; height:56px; object-fit:cover; border-radius:10px; background:#fff}
+.logo-uploader input{display:none}
+.logo-btn{cursor:pointer; padding:8px 10px; border-radius:10px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.1)}
+
+.block-controls{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
+.mini{
+  padding:6px 10px; border-radius:10px; border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.06); color:#fff; font-size:12px; cursor:pointer
+}
+.mini.primary{background: linear-gradient(135deg, var(--brand), var(--brand-2)); color:#fff; border-color: transparent}
+
+/* Paper preview */
+.paper-wrap{display:flex; justify-content:center}
+.paper{
+  width:794px; min-height:1123px; background: var(--paper); color: var(--ink);
+  border-radius:16px; padding:48px 56px; box-shadow:0 30px 70px rgba(0,0,0,.5);
+}
+@media (max-width: 860px){.paper{width:100%}}
+
+.cover{
+  display:grid; grid-template-columns: 80px 1fr; gap:16px; align-items:center;
+  border-bottom: 2px solid #e5e7eb; padding-bottom:16px; margin-bottom:22px;
+}
+.cover img{width:80px; height:80px; object-fit:contain}
+.title{display:grid; gap:4px}
+.title .uni{font-weight:800; font-size:22px}
+.title .meta{color:#475569; font-size:13px}
+
+.heading{text-align:center; font-weight:800; font-size:22px; margin:18px 0 10px 0}
+.meta-grid{display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin-bottom:18px}
+.meta-item{border:1px solid #e5e7eb; border-radius:12px; padding:10px 12px; background:#fafafa}
+.meta-item .label{font-size:12px; color:#6b7280}
+.meta-item .value{font-weight:700}
+
+.qa{display:flex; flex-direction:column; gap:14px}
+.card{border:1px solid #e5e7eb; border-radius:14px; background:#fff; padding:14px}
+.card-tools{display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 10px 0}
+.card-tools .mini.ghost{background:#f3f4f6; color:#111827}
+
+.q{font-weight:700; margin-bottom:6px}
+.a{white-space:pre-wrap; line-height:1.6}
+
+/* titles inside the rendered view */
+.item-title{
+  font-weight:800; margin:4px 0 6px 0; font-size:15px; color:#111827;
+}
+.subhead{
+  font-weight:700; margin:12px 0 6px 0; font-size:14px; color:#374151;
+}
+
+.block-editor{border:1px dashed #e5e7eb; border-radius:10px; padding:10px; background:#fafafa; margin:8px 0}
+.block-editor .row{display:flex; gap:8px; align-items:center; justify-content:space-between; margin-bottom:6px}
+.block-editor .label{font-weight:600; font-size:13px; color:#334155}
+.block-editor .kill{border:1px solid #e5e7eb; background:#fff; color:#111827; border-radius:8px; padding:6px 10px; cursor:pointer; font-size:12px}
+
+/* editors, used to hide during export */
+.edit-only{}
+
+pre{
+  background:#0b1020; color:#e5e7eb; padding:14px; border-radius:12px; overflow:auto;
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size:13px; line-height:1.6; border:1px solid #111827;
+}
+
+/* hide editors and buttons while exporting to PDF */
+.exporting .edit-only{ display:none !important; }
+
+/* Print */
+@media print{
+  body{background:#fff}
+  .shell, .toolbar, .panel{display:none}
+  .paper{box-shadow:none; border-radius:0; width:auto; min-height:auto; padding:32px}
+  .edit-only{ display:none !important; }
+}
+.cover-page{
+  display:block;
+  page-break-after: always;  /* ensures cover is first page */
+}

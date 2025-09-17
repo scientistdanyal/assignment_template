@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Assignment Builder, HTML + JS</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+<!-- Highlight.js for on screen code styling -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"/>
+
+<!-- html2pdf (html2canvas + jsPDF) for PDF export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+  :root{
+    --bg:#0f172a;
+    --paper:#ffffff;
+    --ink:#0f172a;
+    --muted:#6b7280;
+    --brand:#4f46e5;
+    --brand-2:#7c3aed;
+
+    --radius:16px;
+    --ring:0 0 0 2px rgba(79,70,229,.25), 0 10px 30px rgba(2,6,23,.25);
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(124,58,237,.25), transparent 60%),
+      radial-gradient(1200px 600px at 10% 110%, rgba(79,70,229,.25), transparent 60%),
+      var(--bg);
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+    color:#e5e7eb;
+  }
+
+  .shell{
+    max-width:1200px;
+    margin:36px auto;
+    padding:0 16px;
+  }
+
+  .toolbar{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:16px;
+  }
+
+  .toolbar-left, .toolbar-right{display:flex; gap:12px; align-items:center}
+  .btn{
+    padding:10px 14px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.08);
+    background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+    color:#fff;
+    cursor:pointer;
+    font-weight:600;
+    letter-spacing:.2px;
+    backdrop-filter: blur(6px);
+    transition: transform .05s ease, box-shadow .2s ease, border-color .2s ease;
+  }
+  .btn:hover{box-shadow: var(--ring)}
+  .btn:active{transform:translateY(1px)}
+  .btn.brand{background: linear-gradient(135deg, var(--brand), var(--brand-2)); border-color: transparent}
+  .btn.ghost{background: transparent}
+  .hint{color:#cbd5e1; font-size:13px}
+
+  .workspace{
+    display:grid;
+    grid-template-columns: 360px 1fr;
+    gap:16px;
+  }
+  @media (max-width: 960px){
+    .workspace{grid-template-columns: 1fr}
+  }
+
+  /* Left panel */
+  .panel{
+    background: rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:20px;
+    padding:16px;
+    backdrop-filter: blur(8px);
+  }
+  .panel h3{
+    margin:0 0 10px 0;
+    font-size:16px;
+    font-weight:700;
+    color:#fff;
+    letter-spacing:.2px;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:10px;
+  }
+  .field{display:flex; flex-direction:column; gap:6px}
+  .field label{font-size:12px; color:#cbd5e1}
+  .input, .select, .textarea{
+    width:100%;
+    padding:10px 12px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.1);
+    background: rgba(15,23,42,.5);
+    color:#fff;
+    outline:none;
+  }
+  .textarea{min-height:110px; resize:vertical}
+
+  .logo-uploader{
+    display:flex; gap:10px; align-items:center;
+    padding:10px; border:1px dashed rgba(255,255,255,.2);
+    border-radius:12px;
+  }
+  .logo-uploader img{width:56px; height:56px; object-fit:cover; border-radius:10px; background:#fff}
+  .logo-uploader input{display:none}
+  .logo-btn{cursor:pointer; padding:8px 10px; border-radius:10px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.1)}
+
+  .block-controls{
+    display:flex; gap:8px; flex-wrap:wrap; margin-top:10px
+  }
+  .mini{
+    padding:6px 10px; border-radius:10px; border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.06); color:#fff; font-size:12px; cursor:pointer
+  }
+
+  /* Paper preview */
+  .paper-wrap{
+    display:flex; justify-content:center;
+  }
+  .paper{
+    width:794px; /* A4 width at 96dpi approx */
+    min-height:1123px; /* A4 height at 96dpi approx */
+    background: var(--paper);
+    color: var(--ink);
+    border-radius:16px;
+    padding:48px 56px;
+    box-shadow:0 30px 70px rgba(0,0,0,.5);
+  }
+  @media (max-width: 860px){
+    .paper{width:100%}
+  }
+
+  .cover{
+    display:grid;
+    grid-template-columns: 80px 1fr;
+    gap:16px;
+    align-items:center;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom:16px;
+    margin-bottom:22px;
+  }
+  .cover img{width:80px; height:80px; object-fit:contain}
+  .title{
+    display:grid; gap:4px;
+  }
+  .title .uni{font-weight:800; font-size:22px}
+  .title .meta{color:#475569; font-size:13px}
+
+  .heading{
+    text-align:center;
+    font-weight:800;
+    font-size:22px;
+    margin:18px 0 10px 0;
+  }
+  .meta-grid{
+    display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin-bottom:18px;
+  }
+  .meta-item{
+    border:1px solid #e5e7eb; border-radius:12px; padding:10px 12px; background:#fafafa
+  }
+  .meta-item .label{font-size:12px; color:#6b7280}
+  .meta-item .value{font-weight:700}
+
+  .qa{
+    display:flex; flex-direction:column; gap:14px;
+  }
+  .card{
+    border:1px solid #e5e7eb; border-radius:14px; background:#fff; padding:14px 14px;
+  }
+  .q{
+    font-weight:700; margin-bottom:6px;
+  }
+  .a{
+    white-space:pre-wrap; line-height:1.6;
+  }
+  pre{
+    background:#0b1020; color:#e5e7eb; padding:14px; border-radius:12px; overflow:auto;
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size:13px; line-height:1.6; border:1px solid #111827;
+  }
+
+  /* Print adjustments */
+  @media print{
+    body{background:#fff}
+    .shell, .toolbar, .panel{display:none}
+    .paper{box-shadow:none; border-radius:0; width:auto; min-height:auto; padding:32px}
+  }
+</style>
+</head>
+<body>
+  <div class="shell">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <button class="btn brand" id="btnAddQA">Add new item</button>
+        <button class="btn" id="btnAddCode">Add new code item</button>
+        <button class="btn" id="btnClearAll">Clear all items</button>
+      </div>
+      <div class="toolbar-right">
+        <span class="hint">Everything stays local in your browser</span>
+        <button class="btn brand" id="btnExport">Save to PDF</button>
+      </div>
+    </div>
+
+    <div class="workspace">
+      <!-- Left controls -->
+      <div class="panel">
+        <h3>Cover details</h3>
+
+        <div class="logo-uploader">
+          <img id="logoPreview" alt="Logo preview" src="" />
+          <div>
+            <div class="hint" style="margin-bottom:6px">Upload logo (PNG or JPG)</div>
+            <label class="logo-btn">
+              <input type="file" id="logoInput" accept="image/*" />
+              Choose file
+            </label>
+            <button class="logo-btn" id="clearLogo">Remove</button>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:12px">
+          <label>University name</label>
+          <input id="fldUni" class="input" placeholder="e.g. National University of Modern Languages" />
+        </div>
+
+        <div class="grid" style="margin-top:10px">
+          <div class="field">
+            <label>Course name</label>
+            <input id="fldCourse" class="input" placeholder="e.g. Database Systems" />
+          </div>
+          <div class="field">
+            <label>Assignment or Lab number</label>
+            <input id="fldNumber" class="input" placeholder="e.g. Lab 04" />
+          </div>
+        </div>
+
+        <div class="grid" style="margin-top:10px">
+          <div class="field">
+            <label>My name</label>
+            <input id="fldName" class="input" placeholder="Your name" />
+          </div>
+          <div class="field">
+            <label>Roll number</label>
+            <input id="fldRoll" class="input" placeholder="e.g. NUML-BCS-23-123" />
+          </div>
+        </div>
+
+        <div class="grid" style="margin-top:10px">
+          <div class="field">
+            <label>Date</label>
+            <input id="fldDate" class="input" type="date" />
+          </div>
+          <div class="field">
+            <label>Document title</label>
+            <input id="fldDocTitle" class="input" placeholder="e.g. SQL Joins, Practice and Notes" />
+          </div>
+        </div>
+
+        <h3 style="margin-top:18px">Item tools</h3>
+        <div class="block-controls">
+          <button class="mini" id="btnCollapseAll">Collapse all</button>
+          <button class="mini" id="btnExpandAll">Expand all</button>
+          <button class="mini" id="btnAutoNumber">Auto number Q items</button>
+          <button class="mini" id="btnSaveLocal">Save state</button>
+          <button class="mini" id="btnLoadLocal">Load state</button>
+          <button class="mini" id="btnResetLocal">Reset saved</button>
+        </div>
+      </div>
+
+      <!-- Paper preview -->
+      <div class="paper-wrap">
+        <div class="paper" id="paper">
+          <div class="cover">
+            <img id="coverLogo" alt="Logo" />
+            <div class="title">
+              <div class="uni" id="vUni">University name</div>
+              <div class="meta" id="vDocTitle">Document title</div>
+            </div>
+          </div>
+
+          <div class="meta-grid">
+            <div class="meta-item">
+              <div class="label">Course</div>
+              <div class="value" id="vCourse">Course name</div>
+            </div>
+            <div class="meta-item">
+              <div class="label">Assignment or Lab</div>
+              <div class="value" id="vNumber">Assignment number</div>
+            </div>
+            <div class="meta-item">
+              <div class="label">Date</div>
+              <div class="value" id="vDate">YYYY-MM-DD</div>
+            </div>
+            <div class="meta-item">
+              <div class="label">Student</div>
+              <div class="value" id="vName">Your name</div>
+            </div>
+            <div class="meta-item">
+              <div class="label">Roll number</div>
+              <div class="value" id="vRoll">Roll number</div>
+            </div>
+            <div class="meta-item">
+              <div class="label">Total items</div>
+              <div class="value" id="vCount">0</div>
+            </div>
+          </div>
+
+          <div class="heading" id="vHeading">Questions and Answers</div>
+          <div class="qa" id="qaList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  // helpers
+  const $ = sel => document.querySelector(sel);
+  const create = (tag, cls) => { const el = document.createElement(tag); if(cls) el.className = cls; return el };
+
+  // elements
+  const logoInput = $('#logoInput');
+  const logoPreview = $('#logoPreview');
+  const coverLogo = $('#coverLogo');
+  const clearLogo = $('#clearLogo');
+
+  const fldUni = $('#fldUni');
+  const fldCourse = $('#fldCourse');
+  const fldNumber = $('#fldNumber');
+  const fldName = $('#fldName');
+  const fldRoll = $('#fldRoll');
+  const fldDate = $('#fldDate');
+  const fldDocTitle = $('#fldDocTitle');
+
+  const vUni = $('#vUni');
+  const vCourse = $('#vCourse');
+  const vNumber = $('#vNumber');
+  const vName = $('#vName');
+  const vRoll = $('#vRoll');
+  const vDate = $('#vDate');
+  const vDocTitle = $('#vDocTitle');
+  const vCount = $('#vCount');
+
+  const btnAddQA = $('#btnAddQA');
+  const btnAddCode = $('#btnAddCode');
+  const btnClearAll = $('#btnClearAll');
+  const btnExport = $('#btnExport');
+  const btnCollapseAll = $('#btnCollapseAll');
+  const btnExpandAll = $('#btnExpandAll');
+  const btnAutoNumber = $('#btnAutoNumber');
+  const btnSaveLocal = $('#btnSaveLocal');
+  const btnLoadLocal = $('#btnLoadLocal');
+  const btnResetLocal = $('#btnResetLocal');
+
+  const qaList = $('#qaList');
+  const paper = $('#paper');
+
+  // default date today
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth()+1).padStart(2,'0');
+  const dd = String(today.getDate()).padStart(2,'0');
+  fldDate.value = `${yyyy}-${mm}-${dd}`;
+
+  // live bindings
+  const bind = (input, view, fallback) => {
+    const set = () => view.textContent = input.value.trim() || fallback;
+    input.addEventListener('input', set);
+    set();
+  };
+  bind(fldUni, vUni, 'University name');
+  bind(fldCourse, vCourse, 'Course name');
+  bind(fldNumber, vNumber, 'Assignment number');
+  bind(fldName, vName, 'Your name');
+  bind(fldRoll, vRoll, 'Roll number');
+  bind(fldDocTitle, vDocTitle, 'Document title');
+  fldDate.addEventListener('input', ()=> vDate.textContent = fldDate.value || 'YYYY-MM-DD');
+  vDate.textContent = fldDate.value || 'YYYY-MM-DD';
+
+  // logo upload
+  function setLogo(src){
+    logoPreview.src = src || '';
+    coverLogo.src = src || '';
+    coverLogo.style.background = src ? 'transparent' : '#f1f5f9';
+  }
+  clearLogo.addEventListener('click', ()=> setLogo(''));
+  logoInput.addEventListener('change', (e)=>{
+    const file = e.target.files?.[0];
+    if(!file) return;
+    const r = new FileReader();
+    r.onload = () => setLogo(r.result);
+    r.readAsDataURL(file);
+  });
+
+  // block factory
+  let idCounter = 1;
+
+  function makeQA({question='', answer='', isCode=false, lang=''}={}){
+    const card = create('div','card');
+    card.dataset.type = isCode ? 'code' : 'text';
+
+    const top = create('div');
+    const lbl = create('div','q');
+    lbl.textContent = 'Question';
+    const q = create('textarea','input');
+    q.style.width = '100%';
+    q.style.minHeight = '60px';
+    q.placeholder = 'Write the question or query here';
+    q.value = question;
+
+    const aLabel = create('div','q');
+    aLabel.style.marginTop = '10px';
+    aLabel.textContent = isCode ? 'Answer, code' : 'Answer, text';
+
+    let answerArea, codeWrap, codeLangSel, toggleKind;
+
+    toggleKind = create('div');
+    toggleKind.style.display = 'flex';
+    toggleKind.style.gap = '8px';
+    toggleKind.style.alignItems = 'center';
+    toggleKind.style.margin = '8px 0 6px 0';
+
+    const kindBtnText = create('button','mini');
+    kindBtnText.textContent = 'Use text';
+    const kindBtnCode = create('button','mini');
+    kindBtnCode.textContent = 'Use code';
+    toggleKind.append(kindBtnText, kindBtnCode);
+
+    // text area
+    const aText = create('textarea','textarea');
+    aText.placeholder = 'Write the answer here';
+    aText.value = isCode ? '' : answer;
+
+    // code area
+    codeWrap = create('div');
+    codeLangSel = create('select','select');
+    codeLangSel.style.marginBottom = '6px';
+    ['auto','sql','csharp','cpp','python','javascript','html','css','bash','json'].forEach(l=>{
+      const opt = create('option');
+      opt.value = l;
+      opt.textContent = l.toUpperCase();
+      codeLangSel.appendChild(opt);
+    });
+    codeLangSel.value = lang || 'auto';
+
+    const codeArea = create('textarea','textarea');
+    codeArea.placeholder = 'Paste code here';
+    codeArea.value = isCode ? answer : '';
+
+    codeWrap.append(codeLangSel, codeArea);
+
+    // footer controls
+    const foot = create('div');
+    foot.style.display='flex';
+    foot.style.gap='8px';
+    foot.style.marginTop='10px';
+    const up = create('button','mini'); up.textContent = 'Move up';
+    const down = create('button','mini'); down.textContent = 'Move down';
+    const del = create('button','mini'); del.textContent = 'Delete';
+    const collapse = create('button','mini'); collapse.textContent = 'Collapse';
+    foot.append(up, down, del, collapse);
+
+    // render view block under editors
+    const viewBlock = create('div');
+    viewBlock.style.marginTop = '12px';
+    const vQ = create('div','q');
+    const vA = create('div','a');
+    viewBlock.append(vQ, vA);
+
+    function render(){
+      vQ.textContent = q.value ? q.value : 'Untitled question';
+      if(card.dataset.type === 'code'){
+        const pre = create('pre');
+        const code = create('code');
+        const chosen = codeLangSel.value;
+        if(chosen && chosen !== 'auto'){
+          code.className = 'language-' + chosen;
+        }
+        code.textContent = codeArea.value || '';
+        pre.append(code);
+        vA.innerHTML = '';
+        vA.append(pre);
+        try{ hljs.highlightElement(code) }catch(e){}
+      } else {
+        vA.textContent = aText.value || '';
+      }
+      updateCount();
+    }
+
+    // mode switch
+    function setMode(mode){
+      card.dataset.type = mode;
+      aLabel.textContent = mode === 'code' ? 'Answer, code' : 'Answer, text';
+      if(mode === 'code'){
+        aText.style.display = 'none';
+        codeWrap.style.display = 'block';
+      }else{
+        aText.style.display = 'block';
+        codeWrap.style.display = 'none';
+      }
+      render();
+    }
+
+    kindBtnText.addEventListener('click', ()=> setMode('text'));
+    kindBtnCode.addEventListener('click', ()=> setMode('code'));
+
+    // events
+    [q, aText, codeArea].forEach(el=> el.addEventListener('input', render));
+    codeLangSel.addEventListener('change', render);
+
+    // actions
+    up.addEventListener('click', ()=>{
+      const prev = card.previousElementSibling;
+      if(prev) qaList.insertBefore(card, prev);
+    });
+    down.addEventListener('click', ()=>{
+      const next = card.nextElementSibling;
+      if(next) qaList.insertBefore(next, card);
+    });
+    del.addEventListener('click', ()=> { card.remove(); updateCount(); });
+
+    let collapsed = false;
+    collapse.addEventListener('click', ()=>{
+      collapsed = !collapsed;
+      [q, aText, codeWrap, foot].forEach(el=>{
+        el.style.display = collapsed ? 'none' : '';
+      });
+      collapse.textContent = collapsed ? 'Expand' : 'Collapse';
+    });
+
+    // compose card
+    top.append(lbl,q,aLabel,toggleKind,aText,codeWrap,foot,viewBlock);
+    card.append(top);
+    qaList.append(card);
+
+    // init mode
+    setMode(isCode ? 'code' : 'text');
+    render();
+    idCounter += 1;
+  }
+
+  function updateCount(){
+    vCount.textContent = String(qaList.children.length);
+  }
+
+  // add buttons
+  btnAddQA.addEventListener('click', ()=> makeQA({isCode:false}));
+  btnAddCode.addEventListener('click', ()=> makeQA({isCode:true}));
+
+  btnClearAll.addEventListener('click', ()=>{
+    if(confirm('Remove all items, continue')){ qaList.innerHTML=''; updateCount(); }
+  });
+
+  btnCollapseAll.addEventListener('click', ()=>{
+    [...qaList.children].forEach(card=>{
+      const btn = card.querySelector('.mini:last-child');
+      if(btn && btn.textContent === 'Collapse') btn.click();
+    });
+  });
+  btnExpandAll.addEventListener('click', ()=>{
+    [...qaList.children].forEach(card=>{
+      const btn = card.querySelector('.mini:last-child');
+      if(btn && btn.textContent === 'Expand') btn.click();
+    });
+  });
+
+  btnAutoNumber.addEventListener('click', ()=>{
+    [...qaList.children].forEach((card, i)=>{
+      const qEdit = card.querySelector('textarea.input');
+      if(qEdit){
+        const base = qEdit.value.replace(/^\d+\)\s*/, '');
+        qEdit.value = `${i+1}) ${base}`;
+        qEdit.dispatchEvent(new Event('input'));
+      }
+    });
+  });
+
+  // local save, load
+  function snapshot(){
+    return {
+      logo: coverLogo.src || '',
+      uni: fldUni.value,
+      course: fldCourse.value,
+      number: fldNumber.value,
+      name: fldName.value,
+      roll: fldRoll.value,
+      date: fldDate.value,
+      title: fldDocTitle.value,
+      items: [...qaList.children].map(card=>{
+        const type = card.dataset.type;
+        const q = card.querySelector('textarea.input')?.value || '';
+        const aText = card.querySelector('textarea.textarea')?.value || '';
+        const codeArea = card.querySelectorAll('textarea.textarea')[1];
+        const langSel = card.querySelector('select.select');
+        return {
+          type,
+          question: q,
+          answer: type === 'code' ? (codeArea?.value || '') : aText,
+          lang: type === 'code' ? (langSel?.value || 'auto') : 'auto',
+        };
+      })
+    };
+  }
+  function hydrate(s){
+    try{
+      setLogo(s.logo || '');
+      fldUni.value = s.uni || '';
+      fldCourse.value = s.course || '';
+      fldNumber.value = s.number || '';
+      fldName.value = s.name || '';
+      fldRoll.value = s.roll || '';
+      fldDate.value = s.date || '';
+      fldDocTitle.value = s.title || '';
+      // trigger bindings
+      fldUni.dispatchEvent(new Event('input'));
+      fldCourse.dispatchEvent(new Event('input'));
+      fldNumber.dispatchEvent(new Event('input'));
+      fldName.dispatchEvent(new Event('input'));
+      fldRoll.dispatchEvent(new Event('input'));
+      fldDate.dispatchEvent(new Event('input'));
+      fldDocTitle.dispatchEvent(new Event('input'));
+      qaList.innerHTML='';
+      (s.items||[]).forEach(it=> makeQA({
+        question: it.question||'',
+        answer: it.answer||'',
+        isCode: it.type==='code',
+        lang: it.lang||'auto'
+      }));
+      updateCount();
+    }catch(e){
+      alert('Failed to load saved state');
+    }
+  }
+  btnSaveLocal.addEventListener('click', ()=>{
+    localStorage.setItem('assignment_builder_v1', JSON.stringify(snapshot()));
+    alert('Saved locally');
+  });
+  btnLoadLocal.addEventListener('click', ()=>{
+    const raw = localStorage.getItem('assignment_builder_v1');
+    if(!raw) return alert('No saved state found');
+    hydrate(JSON.parse(raw));
+  });
+  btnResetLocal.addEventListener('click', ()=>{
+    localStorage.removeItem('assignment_builder_v1');
+    alert('Saved state cleared');
+  });
+
+  // export PDF
+  btnExport.addEventListener('click', async ()=>{
+    // expand all for clean export
+    btnExpandAll.click();
+
+    // small delay to let layout settle
+    await new Promise(r=> setTimeout(r, 200));
+
+    const opt = {
+      margin:       [10,10,10,10],
+      filename:     (fldDocTitle.value?.trim() || 'assignment') + '.pdf',
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(paper).save();
+  });
+
+  // initial example block
+  makeQA({question:'What is a primary key', answer:'A primary key uniquely identifies each record in a table, it must be unique and not null.'});
+  makeQA({question:'Write SQL to select name and age from students where age is greater than 20',
+          answer:'SELECT name, age\nFROM students\nWHERE age > 20;',
+          isCode:true, lang:'sql'});
+</script>
+</body>
+</html>

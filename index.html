@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Assignment Builder</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Highlight.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"/>
+
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="shell">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <button class="btn brand" id="btnAddItem">Add item</button>
+        <button class="btn" id="btnClearAll">Clear all items</button>
+      </div>
+      <div class="toolbar-right">
+        <span class="hint">All data stays in your browser</span>
+        <button class="btn brand" id="btnExport">Save to PDF</button>
+      </div>
+    </div>
+
+    <div class="workspace">
+      <!-- Left controls -->
+      <div class="panel">
+        <h3>Cover details</h3>
+
+        <div class="logo-uploader">
+          <img id="logoPreview" alt="Logo preview" src="" />
+          <div>
+            <div class="hint" style="margin-bottom:6px">Upload logo, PNG or JPG</div>
+            <label class="logo-btn">
+              <input type="file" id="logoInput" accept="image/*" />
+              Choose file
+            </label>
+            <button class="logo-btn" id="clearLogo">Remove</button>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:12px">
+          <label>University name</label>
+          <input id="fldUni" class="input" placeholder="e.g. National University of Modern Languages" />
+        </div>
+
+        <div class="grid" style="margin-top:10px">
+          <div class="field">
+            <label>Course name</label>
+            <input id="fldCourse" class="input" placeholder="e.g. Database Systems" />
+          </div>
+          <div class="field">
+            <label>Assignment or Lab number</label>
+            <input id="fldNumber" class="input" placeholder="e.g. Lab 04" />
+          </div>
+        </div>
+
+        <div class="grid" style="margin-top:10px">
+          <div class="field">
+            <label>My name</label>
+            <input id="fldName" class="input" placeholder="Your name" />
+          </div>
+          <div class="field">
+            <label>Roll number</label>
+            <input id="fldRoll" class="input" placeholder="e.g. NUML-BCS-23-123" />
+          </div>
+        </div>
+
+        <div class="grid" style="margin-top:10px">
+          <div class="field">
+            <label>Date</label>
+            <input id="fldDate" class="input" type="date" />
+          </div>
+          <div class="field">
+            <label>Document title</label>
+            <input id="fldDocTitle" class="input" placeholder="e.g. SQL Joins, Practice and Notes" />
+          </div>
+        </div>
+
+        <h3 style="margin-top:18px">Item tools</h3>
+        <div class="block-controls">
+          <button class="mini" id="btnCollapseAll">Collapse all</button>
+          <button class="mini" id="btnExpandAll">Expand all</button>
+          <button class="mini" id="btnAutoNumber">Auto number Q items</button>
+          <button class="mini" id="btnSaveLocal">Save state</button>
+          <button class="mini" id="btnLoadLocal">Load state</button>
+          <button class="mini" id="btnResetLocal">Reset saved</button>
+        </div>
+      </div>
+
+      <!-- Paper preview -->
+      <div class="paper-wrap">
+        <div id="paper" class="paper">
+  <div class="cover-page">
+    <div class="cover">
+      <img id="coverLogo" src="" alt="Logo"/>
+      <div class="title">
+        <div id="vUni" class="uni">University name</div>
+        <div id="vDocTitle" class="meta">Document title</div>
+      </div>
+    </div>
+
+    <div class="meta-grid">
+      <div class="meta-item"><div class="label">Course</div><div id="vCourse" class="value">Course name</div></div>
+      <div class="meta-item"><div class="label">Assignment or Lab</div><div id="vNumber" class="value">Assignment number</div></div>
+      <div class="meta-item"><div class="label">Date</div><div id="vDate" class="value">2025-09-17</div></div>
+      <div class="meta-item"><div class="label">Student</div><div id="vName" class="value">Your name</div></div>
+      <div class="meta-item"><div class="label">Roll number</div><div id="vRoll" class="value">Roll number</div></div>
+      <div class="meta-item"><div class="label">Total items</div><div id="vCount" class="value">0</div></div>
+    </div>
+  </div>
+
+  <div class="heading">Questions and Answers</div>
+  <div id="qaList" class="qa"></div>
+</div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- libs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <script src="./script.js"></script>
+</body>
+</html>
